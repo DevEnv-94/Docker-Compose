@@ -1,0 +1,7 @@
+version: "3"                
+services:                  
+  Frontend:                    
+    image: nginx:stable
+    ports:
+      - "127.0.0.1:18888:80"
+      
