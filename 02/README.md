@@ -29,37 +29,51 @@ CMD  ["/app"]
 ```bash
 sudo docker build . -t gocalc:latest
 ```
+
 ```yaml
-version: "3.7"                
-services:                  
-  db:                    
+version: "3.7"
+
+networks:
+  database_network:
+  web_network:
+
+services:
+  database:
     image: postgres:10
     restart: on-failure
+    networks:
+      - database_network
     environment:
       POSTGRES_USER: user
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: DatabasePassword
 
-  app:
+  gocalc:
     image: gocalc:latest
-    restart: on-failure
+    networks:
+      - database_network
+      - web_network
+    restart: unless-stopped
     command: sh -c "/wait && /app"
     depends_on:
-      - db
+      - database
     environment:
-      POSTGRES_URI: "postgres://user:DatabasePassword@db/postgres?sslmode=disable"
-      WAIT_HOSTS: "db:5432"
+      POSTGRES_URI: "postgres://user:DatabasePassword@database/postgres?sslmode=disable"
+      WAIT_HOSTS: "database:5432"
       WAIT_BEFORE: "5"
-  frontend:
-    image: nginx:stable   
-    restart: on-failure               
+
+  nginx:
+    image: nginx:stable
+    networks:
+      - web_network
+    restart: on-failure
     ports:
       - "127.0.0.1:80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - db
-      - app
+      - database
+      - gocalc
 ```
 ```bash
 user  nginx;
@@ -96,12 +110,12 @@ http {
         listen 80;
 
         location  / {
-            proxy_pass http://app:7000;
+            proxy_pass proxy_pass http://gocalc:7000;
         }
     }
 
 }
 ```
 ```bash
-sudo docker-compose -p rbm28 up -d
+sudo docker-compose -p rbm29 up -d
 ```

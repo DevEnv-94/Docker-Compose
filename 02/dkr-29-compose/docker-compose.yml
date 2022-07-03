@@ -1,0 +1,43 @@
+version: "3.7"
+
+networks:
+  database_network:
+  web_network:
+
+services:
+  database:
+    image: postgres:10
+    restart: on-failure
+    networks:
+      - database_network
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: DatabasePassword
+
+  gocalc:
+    image: gocalc:latest
+    networks:
+      - database_network
+      - web_network
+    restart: unless-stopped
+    command: sh -c "/wait && /app"
+    depends_on:
+      - database
+    environment:
+      POSTGRES_URI: "postgres://user:DatabasePassword@database/postgres?sslmode=disable"
+      WAIT_HOSTS: "database:5432"
+      WAIT_BEFORE: "5"
+
+  nginx:
+    image: nginx:stable
+    networks:
+      - web_network
+    restart: on-failure
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - database
+      - gocalc
