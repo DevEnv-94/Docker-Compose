@@ -136,4 +136,4 @@ user@server:~$ curl 127.0.0.1:20000/polls
 </match>
 ```
 
-![indexes](https://github.com/DevEnv-94/logging_project/blob/master/images/Screenshot%202022-06-15%20at%2023.56.40.png) 
+![indexes](https://github.com/DevEnv-94/Docker-Compose/blob/master/04/dkr-31-compose-efk/images/indexes.png) 
