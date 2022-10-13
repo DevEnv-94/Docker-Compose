@@ -110,7 +110,7 @@ http {
         listen 80;
 
         location  / {
-            proxy_pass proxy_pass http://gocalc:7000;
+            proxy_pass http://gocalc:7000;
         }
     }
 
